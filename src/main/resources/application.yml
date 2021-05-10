@@ -1,0 +1,44 @@
+server:
+  port: 8098
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/integracao-pagarme
+    username: postgres
+    password: 1y5h8j
+    initialization-mode: always
+    initialize: true
+    continue-on-error: true
+    platform: postgresql
+    maxActive: 3
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+      format_sql: true
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL9Dialect
+        jdbc:
+          lob.non_contextual_creation: true
+
+app-config:
+  name: integracao-pagarme-api
+  url: http://localhost:8098/
+
+pagarme:
+  api_keys:
+    teste: ${KEY_TESTE}
+    producao: ${KEY_PRODUCAO}
+  base-uri: https://api.pagar.me/1
+  transacoes:
+    uri: ${pagarme.base-uri}/transactions
+  cartoes:
+    uri: ${pagarme.base-uri}/cards
+  estornos:
+    uri: ${pagarme.base-uri}/refunds
