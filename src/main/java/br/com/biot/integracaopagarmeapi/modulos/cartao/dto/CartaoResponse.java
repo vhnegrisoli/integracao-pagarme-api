@@ -14,7 +14,7 @@ import org.springframework.beans.BeanUtils;
 @AllArgsConstructor
 public class CartaoResponse {
 
-    private String id;
+    private Integer id;
 
     private String cartaoId;
 
