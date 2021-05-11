@@ -1,5 +1,7 @@
-package br.com.biot.integracaopagarmeapi.modulos.cartao.dto;
+package br.com.biot.integracaopagarmeapi.modulos.integracao.dto;
 
+import br.com.biot.integracaopagarmeapi.modulos.cartao.dto.CartaoRequest;
+import br.com.biot.integracaopagarmeapi.modulos.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,11 +30,13 @@ public class CartaoClientRequest {
     @JsonProperty("card_holder_name")
     private String nomeProprietarioCartao;
 
-    public static CartaoClientRequest converterDe(CartaoRequest request,
-                                                  String apiKey) {
+    public static CartaoClientRequest converterDe(CartaoRequest request) {
         var clientRequest = new CartaoClientRequest();
         BeanUtils.copyProperties(request, clientRequest);
-        clientRequest.setApiKey(apiKey);
         return clientRequest;
+    }
+
+    public String toJson() {
+        return JsonUtil.converterJsonParaString(this);
     }
 }

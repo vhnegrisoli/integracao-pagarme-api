@@ -1,6 +1,7 @@
 package br.com.biot.integracaopagarmeapi.modulos.cartao.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import br.com.biot.integracaopagarmeapi.modulos.cartao.model.Cartao;
+import br.com.biot.integracaopagarmeapi.modulos.util.JsonUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +16,8 @@ public class CartaoResponse {
 
     private String id;
 
+    private String cartaoId;
+
     private String usuarioId;
 
     private String bandeira;
@@ -23,11 +26,13 @@ public class CartaoResponse {
 
     private String pais;
 
-    public static CartaoResponse converterDe(CartaoClientResponse clientResponse,
-                                             String usuarioId) {
+    public static CartaoResponse converterDe(Cartao cartao) {
         var response = new CartaoResponse();
-        BeanUtils.copyProperties(clientResponse, response);
-        response.setUsuarioId(usuarioId);
+        BeanUtils.copyProperties(cartao, response);
         return response;
+    }
+
+    public String toJson() {
+        return JsonUtil.converterJsonParaString(this);
     }
 }

@@ -1,0 +1,37 @@
+package br.com.biot.integracaopagarmeapi.modulos.integracao.service;
+
+import br.com.biot.integracaopagarmeapi.config.exception.ValidacaoException;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.client.PagarmeCartaoClient;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.CartaoClientRequest;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.CartaoClientResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+public class IntegracaoPagarmeService {
+
+    @Autowired
+    private PagarmeCartaoClient cartaoClient;
+
+    @Value("${pagarme.api_keys.teste}")
+    private String apiKey;
+
+    public CartaoClientResponse salvarCartao(CartaoClientRequest request) {
+        try {
+            log.info("Realizando chamada à API do Pagar.me para salvar o cartão com dados: ".concat(request.toJson()));
+            request.setApiKey(apiKey);
+            var response = cartaoClient
+                .salvarCartao(request)
+                .orElseThrow(() -> new ValidacaoException("Erro ao tentar salvar cartão na Pagar.me."));
+            log.info("Obtendo resposta da API do Pagar.me do cartão salvo: ".concat(response.toJson()));
+            return response;
+        } catch (Exception ex) {
+            log.error("Erro ao tentar salvar Pagar.me: ", ex);
+            throw new ValidacaoException("Erro interno ao tentar salvar cartão na Pagar.me.");
+        }
+    }
+}

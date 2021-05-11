@@ -29,6 +29,8 @@ spring:
 
 app-config:
   name: integracao-pagarme-api
+  version: 1.0.0
+  description: API de integração com o serviço de pagamentos da Pagar.me
   url: http://localhost:8098/
 
 pagarme:

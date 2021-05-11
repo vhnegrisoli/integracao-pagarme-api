@@ -1,7 +1,7 @@
-package br.com.biot.integracaopagarmeapi.modulos.cartao.client;
+package br.com.biot.integracaopagarmeapi.modulos.integracao.client;
 
-import br.com.biot.integracaopagarmeapi.modulos.cartao.dto.CartaoClientRequest;
-import br.com.biot.integracaopagarmeapi.modulos.cartao.dto.CartaoClientResponse;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.CartaoClientRequest;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.CartaoClientResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
