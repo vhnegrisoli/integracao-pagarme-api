@@ -11,4 +11,6 @@ public interface CartaoRepository extends JpaRepository<Cartao, Integer> {
     List<Cartao> findByUsuarioId(String usuarioId);
 
     Optional<Cartao> findByCartaoId(String cartaoId);
+
+    Boolean existsByCartaoId(String cartaoId);
 }

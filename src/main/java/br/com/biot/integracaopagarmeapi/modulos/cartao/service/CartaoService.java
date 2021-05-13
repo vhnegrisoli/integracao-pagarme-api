@@ -6,6 +6,7 @@ import br.com.biot.integracaopagarmeapi.modulos.cartao.dto.CartaoResponse;
 import br.com.biot.integracaopagarmeapi.modulos.cartao.model.Cartao;
 import br.com.biot.integracaopagarmeapi.modulos.cartao.repository.CartaoRepository;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.CartaoClientRequest;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.CartaoClientResponse;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.service.IntegracaoPagarmeService;
 import br.com.biot.integracaopagarmeapi.modulos.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -36,11 +37,15 @@ public class CartaoService {
         validarDadosCartao(request);
         var cartaoCriadoPagarme = integracaoPagarmeService
             .salvarCartao(CartaoClientRequest.converterDe(request));
-        var cartao = Cartao.converterDe(cartaoCriadoPagarme, "sadads5d1a56s65");
-        cartaoRepository.save(cartao);
-        var response = CartaoResponse.converterDe(cartao);
+        validarCartaoIdJaExistente(cartaoCriadoPagarme.getId());
+        var cartaoSalvo = salvarCartaoDoPagarme(cartaoCriadoPagarme);
+        var response = CartaoResponse.converterDe(cartaoSalvo);
         log.info("Resposta do endpoint de salvar cartão: ".concat(response.toJson()));
         return response;
+    }
+
+    private Cartao salvarCartaoDoPagarme(CartaoClientResponse cartaoClientResponse) {
+        return cartaoRepository.save(Cartao.converterDe(cartaoClientResponse, "sadads5d1a56s65"));
     }
 
     private void validarDadosCartao(CartaoRequest cartaoRequest) {
@@ -59,6 +64,12 @@ public class CartaoService {
         }
     }
 
+    private void validarCartaoIdJaExistente(String cartaoId) {
+        if (cartaoRepository.existsByCartaoId(cartaoId)) {
+            throw new ValidacaoException("Este cartão já existe.");
+        }
+    }
+
     private void validarCartaoCreditoValido(CartaoRequest cartaoRequest) {
         if (!new CreditCardValidator().isValid(cartaoRequest.getNumeroCartao())) {
             throw new ValidacaoException("O número do cartão de crédito não está válido.");
@@ -69,8 +80,10 @@ public class CartaoService {
         log.info("Realizando chamada ao endpoint de buscar cartão por cartaoId: ".concat(cartaoId));
         var cartao = CartaoResponse.converterDe(cartaoRepository
             .findByCartaoId(cartaoId)
-            .orElseThrow(() -> new ValidacaoException("O cartão ".concat(cartaoId).concat(" não foi encontrado.")))
-        );
+            .orElseGet(() -> salvarCartaoDoPagarme(integracaoPagarmeService.buscarCartaoPorId(cartaoId))));
+        if (isEmpty(cartao)) {
+            throw new ValidacaoException("O cartão ".concat(cartaoId).concat(" não foi encontrado."));
+        }
         log.info("Resposta da chamda de buscar cartão por cartaoId: ".concat(cartao.toJson()));
         return cartao;
     }
