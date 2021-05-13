@@ -46,6 +46,7 @@ public class Cartao {
     @PrePersist
     public void prePersist() {
         dataCadastro = LocalDateTime.now();
+        dataAtualizacao = LocalDateTime.now();
     }
 
     @PreUpdate
