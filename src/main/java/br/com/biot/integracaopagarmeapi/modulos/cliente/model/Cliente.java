@@ -35,9 +35,6 @@ public class Cliente {
     @Column(name = "EMAIL", nullable = false)
     private String email;
 
-    @Column(name = "DOCUMENTOS", nullable = false)
-    private String documentos;
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "NUMEROS_TELEFONE", nullable = false)
     private List<NumeroTelefone> numerosTelefone;

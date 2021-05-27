@@ -21,4 +21,8 @@ public class Documento {
 
     @Column(name = "NUMERO_DOCUMENTO", nullable = false)
     private String numeroDocumento;
+
+    @ManyToOne
+    @JoinColumn(name = "FK_CLIENTE", nullable = false)
+    private Cliente cliente;
 }
