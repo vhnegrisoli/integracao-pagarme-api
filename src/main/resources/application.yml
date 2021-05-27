@@ -18,7 +18,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
       format_sql: true
     show-sql: true
     properties:
@@ -35,8 +35,8 @@ app-config:
 
 pagarme:
   api_keys:
-    teste: ${KEY_TESTE}
-    producao: ${KEY_PRODUCAO}
+    teste: 123
+    producao: 123
   base-uri: https://api.pagar.me/1
   transacoes:
     uri: ${pagarme.base-uri}/transactions
