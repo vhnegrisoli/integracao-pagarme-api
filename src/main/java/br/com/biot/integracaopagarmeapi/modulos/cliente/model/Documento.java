@@ -25,4 +25,13 @@ public class Documento {
     @ManyToOne
     @JoinColumn(name = "FK_CLIENTE", nullable = false)
     private Cliente cliente;
+
+    public static Documento converterDe(String documento,
+                                        Cliente cliente) {
+        return Documento
+            .builder()
+            .numeroDocumento(documento)
+            .cliente(cliente)
+            .build();
+    }
 }

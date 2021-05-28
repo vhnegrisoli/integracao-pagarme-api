@@ -1,13 +1,18 @@
 package br.com.biot.integracaopagarmeapi.modulos.cliente.model;
 
 import br.com.biot.integracaopagarmeapi.modulos.cartao.model.Cartao;
+import br.com.biot.integracaopagarmeapi.modulos.cliente.dto.ClienteRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Data
 @Entity
@@ -43,4 +48,20 @@ public class Cliente {
     @ManyToOne
     @JoinColumn(name = "FK_CARTAO", nullable = false)
     private Cartao cartao;
+
+    public static Cliente converterDe(ClienteRequest request, Cartao cartao) {
+        return Cliente
+            .builder()
+            .nome(request.getNome())
+            .email(request.getEmail())
+            .numerosTelefone(!isEmpty(request.getTelefones())
+                ? request
+                .getTelefones()
+                .stream()
+                .map(NumeroTelefone::converterDe)
+                .collect(Collectors.toList())
+                : Collections.emptyList())
+            .cartao(cartao)
+            .build();
+    }
 }

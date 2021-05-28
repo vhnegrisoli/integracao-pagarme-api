@@ -21,4 +21,11 @@ public class NumeroTelefone {
 
     @Column(name = "NUMERO_TELEFONE", nullable = false)
     private String numeroTelefone;
+
+    public static NumeroTelefone converterDe(String telefone) {
+        return NumeroTelefone
+            .builder()
+            .numeroTelefone(telefone)
+            .build();
+    }
 }

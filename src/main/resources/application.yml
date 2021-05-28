@@ -44,3 +44,6 @@ pagarme:
     uri: ${pagarme.base-uri}/cards
   estornos:
     uri: ${pagarme.base-uri}/refunds
+
+jwt:
+  secret: Y2FkZWlyYS1saXZyZS11c3VhcmlvLWFwaS1kZXNlbnZvbHZpbWVudG8=

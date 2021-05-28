@@ -1,5 +1,6 @@
 package br.com.biot.integracaopagarmeapi.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,15 @@ import java.util.List;
 @EnableSwagger2
 public class SwaggerConfig {
 
+    @Value("${app-config.name}")
+    private String appName;
+    @Value("${app-config.description}")
+    private String appDescription;
+    @Value("${app-config.version}")
+    private String appVersion;
+    @Value("${app-config.url}")
+    private String appUrl;
+
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
@@ -34,10 +44,10 @@ public class SwaggerConfig {
 
     private ApiInfo getApiInfo() {
         return new ApiInfoBuilder()
-            .title("${app-config.name}")
-            .description("${app-config.description}")
-            .version("${app-config.name}")
-            .licenseUrl("${app-config.uri}")
+            .title(appName)
+            .description(appDescription)
+            .version(appVersion)
+            .licenseUrl(appUrl)
             .build();
     }
 
