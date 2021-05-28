@@ -13,9 +13,10 @@ import java.util.List;
 @AllArgsConstructor
 public class ClienteRequest {
 
-    private String id;
+    private String usuarioId;
     private String nome;
     private String email;
     private List<String> telefones;
     private List<String> documentos;
+    private EnderecoRequest endereco;
 }

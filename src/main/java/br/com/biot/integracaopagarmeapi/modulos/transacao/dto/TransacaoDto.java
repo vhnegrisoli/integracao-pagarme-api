@@ -1,5 +1,6 @@
 package br.com.biot.integracaopagarmeapi.modulos.transacao.dto;
 
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.ClienteClientRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,7 +25,7 @@ public class TransacaoDto {
     private String cartaoId;
 
     @JsonProperty("customer")
-    private ClienteDto cliente;
+    private ClienteClientRequest cliente;
 
     @JsonProperty("billing")
     private CobrancaDto cobranca;

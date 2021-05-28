@@ -1,5 +1,6 @@
 package br.com.biot.integracaopagarmeapi.modulos.cliente.model;
 
+import br.com.biot.integracaopagarmeapi.modulos.cliente.dto.EnderecoRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,4 +47,19 @@ public class Endereco {
     @ManyToOne
     @JoinColumn(name = "FK_CLIENTE", nullable = false)
     private Cliente cliente;
+
+    public static Endereco converterDe(EnderecoRequest request, Cliente cliente) {
+        return Endereco
+            .builder()
+            .pais(request.getPais())
+            .estado(request.getEstado())
+            .cidade(request.getCidade())
+            .rua(request.getRua())
+            .numeroRua(request.getNumeroRua())
+            .cep(request.getCep())
+            .bairro(request.getBairro())
+            .complemento(request.getComplemento())
+            .cliente(cliente)
+            .build();
+    }
 }

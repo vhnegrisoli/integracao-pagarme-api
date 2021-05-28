@@ -1,18 +1,14 @@
 package br.com.biot.integracaopagarmeapi.modulos.cliente.model;
 
-import br.com.biot.integracaopagarmeapi.modulos.cartao.model.Cartao;
-import br.com.biot.integracaopagarmeapi.modulos.cliente.dto.ClienteRequest;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.ClienteClientResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Data
 @Entity
@@ -26,11 +22,11 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
 
+    @Column(name = "ID_CLIENTE_PAGARME", nullable = false)
+    private Integer idClientePagarme;
+
     @Column(name = "ID_EXTERNO", nullable = false)
     private String idExterno;
-
-    @Column(name = "USUARIO_ID", nullable = false)
-    private String usuarioId;
 
     @Column(name = "NOME", nullable = false)
     private String nome;
@@ -45,23 +41,19 @@ public class Cliente {
     @JoinColumn(name = "NUMEROS_TELEFONE", nullable = false)
     private List<NumeroTelefone> numerosTelefone;
 
-    @ManyToOne
-    @JoinColumn(name = "FK_CARTAO", nullable = false)
-    private Cartao cartao;
-
-    public static Cliente converterDe(ClienteRequest request, Cartao cartao) {
+    public static Cliente converterDe(ClienteClientResponse response) {
         return Cliente
             .builder()
-            .nome(request.getNome())
-            .email(request.getEmail())
-            .numerosTelefone(!isEmpty(request.getTelefones())
-                ? request
-                .getTelefones()
+            .idClientePagarme(response.getId())
+            .idExterno(response.getIdExterno())
+            .nome(response.getNome())
+            .email(response.getEmail())
+            .tipo(response.getTipo())
+            .numerosTelefone(response
+                .getNumerosTelefone()
                 .stream()
                 .map(NumeroTelefone::converterDe)
-                .collect(Collectors.toList())
-                : Collections.emptyList())
-            .cartao(cartao)
+                .collect(Collectors.toList()))
             .build();
     }
 }

@@ -1,17 +1,22 @@
-package br.com.biot.integracaopagarmeapi.modulos.transacao.dto;
+package br.com.biot.integracaopagarmeapi.modulos.integracao.dto;
 
+import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.ClienteDocumentoDto;
+import br.com.biot.integracaopagarmeapi.modulos.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClienteDto {
+public class ClienteClientResponse {
+
+    private Integer id;
 
     @JsonProperty("external_id")
     private String idExterno;
@@ -29,8 +34,12 @@ public class ClienteDto {
     private String email;
 
     @JsonProperty("documents")
-    private List<ClienteDocumentoDto> documentos = new ArrayList<>();
+    private List<ClienteDocumentoDto> documentos;
 
     @JsonProperty("phone_numbers")
-    private List<String> numerosTelefone = new ArrayList<>();
+    private List<String> numerosTelefone;
+
+    public String toJson() {
+        return JsonUtil.converterJsonParaString(this);
+    }
 }

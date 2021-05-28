@@ -12,9 +12,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClienteDocumentoDto {
 
+    private static final String TIPO_CPF = "cpf";
+
     @JsonProperty("type")
     private String tipo;
 
     @JsonProperty("number")
     private String numeroDocumento;
+
+    public static ClienteDocumentoDto converterDe(String documento) {
+        return ClienteDocumentoDto
+            .builder()
+            .tipo(TIPO_CPF)
+            .numeroDocumento(documento)
+            .build();
+    }
 }

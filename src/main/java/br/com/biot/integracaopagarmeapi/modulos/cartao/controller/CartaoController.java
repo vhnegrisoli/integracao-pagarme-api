@@ -27,8 +27,8 @@ public class CartaoController {
         return cartaoService.buscarCartaoPorCartaoId(cartaoId);
     }
 
-    @GetMapping("usuario/{usuarioId}")
-    public List<CartaoResponse> buscarCartaoPorUsuarioId(@PathVariable String usuarioId) {
-        return cartaoService.buscarCartaoPorUsuarioId(usuarioId);
+    @GetMapping("usuario")
+    public List<CartaoResponse> buscarCartaoPorUsuarioId() {
+        return cartaoService.buscarCartaoPorUsuarioId();
     }
 }

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class IntegracaoPagarmeService {
+public class IntegracaoCartaoService {
 
     @Autowired
     private PagarmeCartaoClient cartaoClient;
@@ -40,7 +40,7 @@ public class IntegracaoPagarmeService {
         try {
             log.info("Realizando chamada à API do Pagar.me para buscar um cartão pelo ID: ".concat(cartaoId));
             var response = cartaoClient
-                .buscarCartaoPorId(apiKey, ApiKeyRequest.criar(apiKey))
+                .buscarCartaoPorId(cartaoId, ApiKeyRequest.criar(apiKey))
                 .orElseThrow(() -> new ValidacaoException("Erro ao tentar buscar cartão por ID na Pagar.me."));
             log.info("Obtendo resposta da API do Pagar.me de cartão por ID: ".concat(response.toJson()));
             return response;

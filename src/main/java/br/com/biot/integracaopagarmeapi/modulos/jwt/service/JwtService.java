@@ -10,6 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+
+import static br.com.biot.integracaopagarmeapi.modulos.util.RequestUtil.getCurrentRequest;
+import static br.com.biot.integracaopagarmeapi.modulos.util.TokenUtil.extrairTokenDoRequest;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Slf4j
@@ -25,6 +29,11 @@ public class JwtService {
     public boolean possuiUsuarioAutenticado(String token) {
         var usuario = recuperarDadosDoUsuarioDoToken(token);
         return !isEmpty(usuario);
+    }
+
+    public JwtUsuarioResponse recuperarUsuarioAutenticado() {
+        var token = extrairTokenDoRequest(getCurrentRequest());
+        return recuperarDadosDoUsuarioDoToken(token);
     }
 
     public JwtUsuarioResponse recuperarDadosDoUsuarioDoToken(String jwt) {

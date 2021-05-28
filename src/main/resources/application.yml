@@ -18,7 +18,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
       format_sql: true
     show-sql: true
     properties:
@@ -44,6 +44,8 @@ pagarme:
     uri: ${pagarme.base-uri}/cards
   estornos:
     uri: ${pagarme.base-uri}/refunds
+  clientes:
+    uri: ${pagarme.base-uri}/customers
 
 jwt:
-  secret: Y2FkZWlyYS1saXZyZS11c3VhcmlvLWFwaS1kZXNlbnZvbHZpbWVudG8=
+  secret: Y2FkZWlyYS1saXZyZS11c3VhcmlvLWFwaS1wcm9kdWNhbw==
