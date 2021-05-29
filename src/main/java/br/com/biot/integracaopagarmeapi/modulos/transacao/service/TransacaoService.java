@@ -1,18 +1,23 @@
 package br.com.biot.integracaopagarmeapi.modulos.transacao.service;
 
 import br.com.biot.integracaopagarmeapi.config.exception.ValidacaoException;
+import br.com.biot.integracaopagarmeapi.modulos.cartao.model.Cartao;
 import br.com.biot.integracaopagarmeapi.modulos.cartao.service.CartaoService;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.transacao.TransacaoClientRequest;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.transacao.TransacaoClientResponse;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.service.IntegracaoTransacaoService;
+import br.com.biot.integracaopagarmeapi.modulos.jwt.dto.JwtUsuarioResponse;
 import br.com.biot.integracaopagarmeapi.modulos.jwt.service.JwtService;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.CobrancaRequest;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.EnderecoCobrancaRequest;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.ItemTransacaoRequest;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.TransacaoRequest;
+import br.com.biot.integracaopagarmeapi.modulos.transacao.model.Transacao;
+import br.com.biot.integracaopagarmeapi.modulos.transacao.repository.TransacaoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static br.com.biot.integracaopagarmeapi.modulos.transacao.enums.TransacaoStatus.*;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -22,11 +27,11 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 public class TransacaoService {
 
     @Autowired
+    private TransacaoRepository transacaoRepository;
+    @Autowired
     private IntegracaoTransacaoService integracaoTransacaoService;
-
     @Autowired
     private CartaoService cartaoService;
-
     @Autowired
     private JwtService jwtService;
 
@@ -35,11 +40,13 @@ public class TransacaoService {
             log.info("Realizando chamada ao endpoint de salvar e capturar transações com dados: ".concat(transacaoRequest.toJson()));
             validarDadosTransacao(transacaoRequest);
             var usuario = jwtService.recuperarUsuarioAutenticado();
+            var cartao = cartaoService.buscarCartaoPorCartaoIdEUsuarioId(transacaoRequest.getCartaoId(), usuario.getId());
             var transacaoClientRequest =  TransacaoClientRequest.converterDe(usuario, transacaoRequest);
             var transacaoRealizada = realizarTransacaoPagarme(transacaoClientRequest);
             validarTransacaoAprovada(transacaoRealizada);
             capturarTransacaoPagarme(transacaoRealizada);
             log.info("Resposta da chamada de realização de transações: ".concat(transacaoRealizada.toJson()));
+            persistirTransacao(transacaoRealizada, usuario, cartao);
             return transacaoRealizada;
         } catch (Exception ex) {
             log.error("Erro ao salvar transação: ", ex);
@@ -77,6 +84,13 @@ public class TransacaoService {
             log.info("A transação ".concat(transacaoId).concat(" já está paga e capturada."));
         }
         return transacaoRealizada;
+    }
+
+    @Transactional
+    private void persistirTransacao(TransacaoClientResponse transacaoResponse,
+                                    JwtUsuarioResponse usuario,
+                                    Cartao cartao) {
+        transacaoRepository.save(Transacao.converterDe(usuario, transacaoResponse, cartao));
     }
 
     private void validarDadosTransacao(TransacaoRequest request) {

@@ -1,5 +1,6 @@
 package br.com.biot.integracaopagarmeapi.modulos.cartao.service;
 
+import br.com.biot.integracaopagarmeapi.config.exception.OperacaoProibidaException;
 import br.com.biot.integracaopagarmeapi.config.exception.ValidacaoException;
 import br.com.biot.integracaopagarmeapi.modulos.cartao.dto.CartaoRequest;
 import br.com.biot.integracaopagarmeapi.modulos.cartao.dto.CartaoResponse;
@@ -102,5 +103,11 @@ public class CartaoService {
             .collect(Collectors.toList());
         log.info("Resposta da chamda de buscar cartão por cartaoId: ".concat(converterJsonParaString(cartoes)));
         return cartoes;
+    }
+
+    public Cartao buscarCartaoPorCartaoIdEUsuarioId(String cartaoId, String usuarioId) {
+        return cartaoRepository
+            .findByCartaoIdAndUsuarioId(cartaoId, usuarioId)
+            .orElseThrow(() -> new OperacaoProibidaException("Você não possui este cartão ou não tem permissão para visualizar."));
     }
 }
