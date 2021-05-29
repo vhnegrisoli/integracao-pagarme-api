@@ -5,10 +5,8 @@ import br.com.biot.integracaopagarmeapi.modulos.cartao.dto.CartaoRequest;
 import br.com.biot.integracaopagarmeapi.modulos.cartao.dto.CartaoResponse;
 import br.com.biot.integracaopagarmeapi.modulos.cartao.model.Cartao;
 import br.com.biot.integracaopagarmeapi.modulos.cartao.repository.CartaoRepository;
-import br.com.biot.integracaopagarmeapi.modulos.cliente.cliente.ClienteService;
-import br.com.biot.integracaopagarmeapi.modulos.cliente.model.Cliente;
-import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.CartaoClientRequest;
-import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.CartaoClientResponse;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.cartao.CartaoClientRequest;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.cartao.CartaoClientResponse;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.service.IntegracaoCartaoService;
 import br.com.biot.integracaopagarmeapi.modulos.jwt.dto.JwtUsuarioResponse;
 import br.com.biot.integracaopagarmeapi.modulos.jwt.service.JwtService;
@@ -34,8 +32,6 @@ public class CartaoService {
     private IntegracaoCartaoService integracaoCartaoService;
     @Autowired
     private JwtService jwtService;
-    @Autowired
-    private ClienteService clienteService;
 
     @Transactional
     public CartaoResponse salvarCartao(CartaoRequest request) {
@@ -44,18 +40,16 @@ public class CartaoService {
         var cartaoCriadoPagarme = integracaoCartaoService
             .salvarCartao(CartaoClientRequest.converterDe(request));
         var usuarioAutenticado = jwtService.recuperarUsuarioAutenticado();
-        var cliente = clienteService.definirCliente(request.getCliente(), usuarioAutenticado);
         validarCartaoIdJaExistente(cartaoCriadoPagarme.getId());
-        var cartaoSalvo = salvarCartaoDoPagarme(cartaoCriadoPagarme, cliente, usuarioAutenticado);
+        var cartaoSalvo = salvarCartaoDoPagarme(cartaoCriadoPagarme, usuarioAutenticado);
         var response = CartaoResponse.converterDe(cartaoSalvo);
         log.info("Resposta do endpoint de salvar cartão: ".concat(response.toJson()));
         return response;
     }
 
     private Cartao salvarCartaoDoPagarme(CartaoClientResponse cartaoClientResponse,
-                                         Cliente cliente,
                                          JwtUsuarioResponse usuarioAutenticado) {
-        return cartaoRepository.save(Cartao.converterDe(cartaoClientResponse, cliente, usuarioAutenticado.getId()));
+        return cartaoRepository.save(Cartao.converterDe(cartaoClientResponse, usuarioAutenticado.getId()));
     }
 
     private void validarDadosCartao(CartaoRequest cartaoRequest) {
@@ -68,8 +62,7 @@ public class CartaoService {
             || isEmpty(cartaoRequest.getNumeroCartao())
             || isEmpty(cartaoRequest.getCvvCartao())
             || isEmpty(cartaoRequest.getNumeroCartao())
-            || isEmpty(cartaoRequest.getNomeProprietarioCartao())
-            || isEmpty(cartaoRequest.getCliente())) {
+            || isEmpty(cartaoRequest.getNomeProprietarioCartao())) {
             throw new ValidacaoException("É necessário informar todos os dados do cartão.");
         }
     }
@@ -91,8 +84,7 @@ public class CartaoService {
         var usuario = jwtService.recuperarUsuarioAutenticado();
         var cartao = CartaoResponse.converterDe(cartaoRepository
             .findByCartaoId(cartaoId)
-            .orElseGet(() -> salvarCartaoDoPagarme(integracaoCartaoService.buscarCartaoPorId(cartaoId),
-                clienteService.buscarClientePorEmail(usuario.getEmail()), usuario)));
+            .orElseGet(() -> salvarCartaoDoPagarme(integracaoCartaoService.buscarCartaoPorId(cartaoId), usuario)));
         if (isEmpty(cartao)) {
             throw new ValidacaoException("O cartão ".concat(cartaoId).concat(" não foi encontrado."));
         }

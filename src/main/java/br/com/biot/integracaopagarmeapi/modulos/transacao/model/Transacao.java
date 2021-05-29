@@ -1,6 +1,9 @@
 package br.com.biot.integracaopagarmeapi.modulos.transacao.model;
 
 import br.com.biot.integracaopagarmeapi.modulos.cartao.model.Cartao;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.transacao.TransacaoClientResponse;
+import br.com.biot.integracaopagarmeapi.modulos.jwt.dto.JwtUsuarioResponse;
+import br.com.biot.integracaopagarmeapi.modulos.transacao.enums.TransacaoStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,8 +35,12 @@ public class Transacao {
     @Column(name = "TOTAL_TRANSACAO", nullable = false)
     private BigDecimal totalTransacao;
 
-    @Column(name = "SITUACAO", nullable = false)
-    private String situacao;
+    @Column(name = "SITUACAO_TRANSACAO", nullable = false)
+    private String situacaoTransacao;
+
+    @Column(name = "TRANSACAO_STATUS", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TransacaoStatus transacaoStatus;
 
     @Column(name = "DATA_CADASTRO", nullable = false, updatable = false)
     private LocalDateTime dataCadastro;
@@ -41,5 +48,11 @@ public class Transacao {
     @PrePersist
     public void prePersist() {
         dataCadastro = LocalDateTime.now();
+    }
+
+    public static Transacao converterDe(JwtUsuarioResponse usuario,
+                                        TransacaoClientResponse transacaoResponse,
+                                        Cartao cartao) {
+        return null;
     }
 }

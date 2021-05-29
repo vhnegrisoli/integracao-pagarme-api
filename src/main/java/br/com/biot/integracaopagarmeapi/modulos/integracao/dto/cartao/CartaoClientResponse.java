@@ -1,4 +1,4 @@
-package br.com.biot.integracaopagarmeapi.modulos.integracao.dto;
+package br.com.biot.integracaopagarmeapi.modulos.integracao.dto.cartao;
 
 import br.com.biot.integracaopagarmeapi.modulos.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -3,9 +3,8 @@ package br.com.biot.integracaopagarmeapi.modulos.integracao.service;
 import br.com.biot.integracaopagarmeapi.config.exception.ValidacaoException;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.client.PagarmeCartaoClient;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.ApiKeyRequest;
-import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.CartaoClientRequest;
-import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.CartaoClientResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.cartao.CartaoClientRequest;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.cartao.CartaoClientResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,8 +22,8 @@ public class IntegracaoCartaoService {
 
     public CartaoClientResponse salvarCartao(CartaoClientRequest request) {
         try {
-            log.info("Realizando chamada à API do Pagar.me para salvar o cartão com dados: ".concat(request.toJson()));
             request.setApiKey(apiKey);
+            log.info("Realizando chamada à API do Pagar.me para salvar o cartão com dados: ".concat(request.toJson()));
             var response = cartaoClient
                 .salvarCartao(request)
                 .orElseThrow(() -> new ValidacaoException("Erro ao tentar salvar cartão na Pagar.me."));
