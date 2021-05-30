@@ -88,7 +88,7 @@ public class Transacao {
             .build();
     }
 
-    private static TransacaoStatus definirTransacaoStatus(String status) {
+    public static TransacaoStatus definirTransacaoStatus(String status) {
         try {
             return Arrays
                 .stream(TransacaoStatus.values())

@@ -12,6 +12,7 @@ import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.CobrancaRequest;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.EnderecoCobrancaRequest;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.ItemTransacaoRequest;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.TransacaoRequest;
+import br.com.biot.integracaopagarmeapi.modulos.transacao.enums.TransacaoStatus;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.model.Transacao;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.repository.TransacaoRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -44,9 +45,9 @@ public class TransacaoService {
             var transacaoClientRequest =  TransacaoClientRequest.converterDe(usuario, transacaoRequest);
             var transacaoRealizada = realizarTransacaoPagarme(transacaoClientRequest);
             validarTransacaoAprovada(transacaoRealizada);
+            persistirTransacao(transacaoRealizada, usuario, cartao);
             capturarTransacaoPagarme(transacaoRealizada);
             log.info("Resposta da chamada de realização de transações: ".concat(transacaoRealizada.toJson()));
-            persistirTransacao(transacaoRealizada, usuario, cartao);
             return transacaoRealizada;
         } catch (Exception ex) {
             log.error("Erro ao salvar transação: ", ex);
@@ -62,35 +63,55 @@ public class TransacaoService {
     private void validarTransacaoAprovada(TransacaoClientResponse transacaoResponse) {
         var status = transacaoResponse.getStatus();
         if (isEmpty(status)) {
-            throw new ValidacaoException("A transação não retornou status.");
+            throw new ValidacaoException("A transação ".concat(transacaoResponse.getIdStr()).concat(" não retornou status."));
         }
-        log.info("Status da transação ".concat(String.valueOf(transacaoResponse.getId())).concat(": ").concat(status));
+        log.info("Status da transação ".concat(transacaoResponse.getIdStr()).concat(": ").concat(status));
         if (!possuiStatusValidos(status)) {
             throw new ValidacaoException("A transação foi recusada na Pagar.me com status: ".concat(status));
         }
     }
 
     private TransacaoClientResponse capturarTransacaoPagarme(TransacaoClientResponse transacaoRealizada) {
-        var transacaoId = String.valueOf(transacaoRealizada.getId());
         if (transacaoRealizada.getStatus().equals(AUTORIZADA.getStatusPagarme())) {
-            log.info("A transação".concat(transacaoId).concat(" está AUTORIZADA. Poderá ser feita a captura."));
-            return integracaoTransacaoService
-                .capturarTransacao(transacaoRealizada.getId());
+            log.info("A transação".concat(transacaoRealizada.getIdStr()).concat(" está AUTORIZADA. Poderá ser feita a captura."));
+            var transacaoCapturada = integracaoTransacaoService.capturarTransacao(transacaoRealizada.getId());
+            atualizarStatusTransacao(transacaoCapturada);
+            return transacaoCapturada;
         }
-        if (transacaoRealizada.getStatus().equals(ANALISANDO.getStatusPagarme())) {
-            log.info("A transação ".concat(transacaoId).concat(" não pode ser capturada pois está em análise."));
-        }
-        if (transacaoRealizada.getStatus().equals(PAGA.getStatusPagarme())) {
-            log.info("A transação ".concat(transacaoId).concat(" já está paga e capturada."));
-        }
+        logarResultadoCaptura(transacaoRealizada);
         return transacaoRealizada;
+    }
+
+    private void logarResultadoCaptura(TransacaoClientResponse transacaoRealizada) {
+
+        if (ANALISANDO.getStatusPagarme().equals(transacaoRealizada.getStatus())) {
+            log.info("A transação ".concat(transacaoRealizada.getIdStr()).concat(" não pode ser capturada pois está em análise."));
+        }
+        if (PAGA.getStatusPagarme().equals(transacaoRealizada.getStatus())) {
+            log.info("A transação ".concat(transacaoRealizada.getIdStr()).concat(" já está paga e capturada."));
+        }
+    }
+
+    @Transactional
+    private void atualizarStatusTransacao(TransacaoClientResponse transacaoCapturada) {
+        log.info("Atualizando o status da transação "
+            .concat(transacaoCapturada.getIdStr())
+            .concat(" para situação: ")
+            .concat(transacaoCapturada.getStatus()));
+        var transacaoExistente = buscarPorTransacaoId(transacaoCapturada.getId());
+        transacaoExistente.setSituacaoTransacao(transacaoCapturada.getStatus());
+        transacaoExistente.setTransacaoStatus(Transacao.definirTransacaoStatus(transacaoCapturada.getStatus()));
+        transacaoRepository.save(transacaoExistente);
+        log.info("Status da transação ".concat(transacaoCapturada.getIdStr()).concat(" atualizada com sucesso."));
     }
 
     @Transactional
     private void persistirTransacao(TransacaoClientResponse transacaoResponse,
                                     JwtUsuarioResponse usuario,
                                     Cartao cartao) {
+        log.info("Salvando a transação: ".concat(transacaoResponse.getIdStr()));
         transacaoRepository.save(Transacao.converterDe(usuario, transacaoResponse, cartao));
+        log.info("Transação: ".concat(transacaoResponse.getIdStr()).concat(" salva com sucesso."));
     }
 
     private void validarDadosTransacao(TransacaoRequest request) {
@@ -138,5 +159,15 @@ public class TransacaoService {
          throw new ValidacaoException("É necessário informar os campos dos itens:"
              + " id, preço unitário, título e quantidade.");
         }
+    }
+
+    public Transacao buscarPorTransacaoId(Long transacaoId) {
+        if (isEmpty(transacaoId)) {
+            throw new ValidacaoException("É necessário informar o ID da transação.");
+        }
+        return transacaoRepository
+            .findByTransacaoId(transacaoId)
+            .orElseThrow(() -> new ValidacaoException("Não foi encontrada uma transação para o ID "
+                .concat(String.valueOf(transacaoId))));
     }
 }

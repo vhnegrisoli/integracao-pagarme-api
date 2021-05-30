@@ -1,12 +1,14 @@
 package br.com.biot.integracaopagarmeapi.modulos.integracao.dto.transacao;
 
 import br.com.biot.integracaopagarmeapi.modulos.util.JsonUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.beans.Transient;
 import java.math.BigDecimal;
 
 @Data
@@ -52,6 +54,11 @@ public class TransacaoClientResponse {
 
     @JsonProperty("capture_method")
     private String metodoCaptura;
+
+    @JsonIgnore
+    public String getIdStr() {
+        return String.valueOf(id);
+    }
 
     public String toJson() {
         return JsonUtil.converterJsonParaString(this);
