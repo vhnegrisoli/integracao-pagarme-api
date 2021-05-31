@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class TransacaoClientRequest {
 
+    private static final String PREFIXO_55 = "+55";
+
     @JsonProperty("api_key")
     private String apiKey;
 
@@ -43,7 +45,7 @@ public class TransacaoClientRequest {
             .builder()
             .total(transacaoRequest.getTotal())
             .cartaoId(transacaoRequest.getCartaoId())
-            .cliente(ClienteClientRequest.converterDe(usuario, transacaoRequest.getNumerosTelefone()))
+            .cliente(ClienteClientRequest.converterDe(usuario, tratarNumerosTelefone(transacaoRequest.getNumerosTelefone())))
             .cobranca(CobrancaClientRequest.converterDe(transacaoRequest.getCobranca()))
             .itens(transacaoRequest
                 .getItens()
@@ -52,6 +54,20 @@ public class TransacaoClientRequest {
                 .collect(Collectors.toList())
             )
             .build();
+    }
+
+    private static List<String> tratarNumerosTelefone(List<String> telefones) {
+        return telefones
+            .stream()
+            .map(TransacaoClientRequest::tratarNumeroTelefone)
+            .collect(Collectors.toList());
+    }
+
+    private static String tratarNumeroTelefone(String numeroTelefone) {
+        if (!numeroTelefone.contains(PREFIXO_55)) {
+            return PREFIXO_55.concat(numeroTelefone);
+        }
+        return numeroTelefone;
     }
 
     public String toJson() {

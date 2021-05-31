@@ -1,5 +1,6 @@
 package br.com.biot.integracaopagarmeapi.modulos.transacao.service;
 
+import br.com.biot.integracaopagarmeapi.config.exception.OperacaoProibidaException;
 import br.com.biot.integracaopagarmeapi.config.exception.ValidacaoException;
 import br.com.biot.integracaopagarmeapi.modulos.cartao.model.Cartao;
 import br.com.biot.integracaopagarmeapi.modulos.cartao.service.CartaoService;
@@ -16,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static br.com.biot.integracaopagarmeapi.modulos.transacao.enums.TransacaoStatus.*;
+import static br.com.biot.integracaopagarmeapi.modulos.transacao.enums.TransacaoStatus.possuiStatusValidos;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Slf4j
@@ -170,5 +171,13 @@ public class TransacaoService {
             .findByTransacaoId(transacaoId)
             .orElseThrow(() -> new ValidacaoException("Não foi encontrada uma transação para o ID "
                 .concat(String.valueOf(transacaoId))));
+    }
+
+    public TransacaoResponse buscarTransacaoPorTransacaoId(Long transacaoId) {
+        var transacao = buscarPorTransacaoId(transacaoId);
+        if (!jwtService.recuperarUsuarioAutenticado().getId().equals(transacao.getUsuarioId())) {
+            throw new OperacaoProibidaException("Você não tem permissão para visualizar os dados dessa transação.");
+        }
+        return TransacaoResponse.converterDe(transacao);
     }
 }

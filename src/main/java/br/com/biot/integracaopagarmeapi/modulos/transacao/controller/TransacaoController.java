@@ -4,10 +4,7 @@ import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.TransacaoRequest;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.TransacaoResponse;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.service.TransacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/transacao")
@@ -19,5 +16,10 @@ public class TransacaoController {
     @PostMapping
     public TransacaoResponse salvarTransacao(@RequestBody TransacaoRequest transacaoRequest) {
         return transacaoService.salvarTransacao(transacaoRequest);
+    }
+
+    @GetMapping("{transacaoId}")
+    public TransacaoResponse buscarTransacaoPorTransacaoId(@PathVariable Long transacaoId) {
+        return transacaoService.buscarTransacaoPorTransacaoId(transacaoId);
     }
 }
