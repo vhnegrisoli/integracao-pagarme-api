@@ -1,7 +1,7 @@
 package br.com.biot.integracaopagarmeapi.modulos.transacao.controller;
 
-import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.transacao.TransacaoClientResponse;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.TransacaoRequest;
+import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.TransacaoResponse;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.service.TransacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +17,7 @@ public class TransacaoController {
     private TransacaoService transacaoService;
 
     @PostMapping
-    public TransacaoClientResponse salvarTransacao(@RequestBody TransacaoRequest transacaoRequest) {
+    public TransacaoResponse salvarTransacao(@RequestBody TransacaoRequest transacaoRequest) {
         return transacaoService.salvarTransacao(transacaoRequest);
     }
 }

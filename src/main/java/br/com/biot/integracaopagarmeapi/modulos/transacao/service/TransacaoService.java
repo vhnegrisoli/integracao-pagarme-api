@@ -8,11 +8,7 @@ import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.transacao.Transac
 import br.com.biot.integracaopagarmeapi.modulos.integracao.service.IntegracaoTransacaoService;
 import br.com.biot.integracaopagarmeapi.modulos.jwt.dto.JwtUsuarioResponse;
 import br.com.biot.integracaopagarmeapi.modulos.jwt.service.JwtService;
-import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.CobrancaRequest;
-import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.EnderecoCobrancaRequest;
-import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.ItemTransacaoRequest;
-import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.TransacaoRequest;
-import br.com.biot.integracaopagarmeapi.modulos.transacao.enums.TransacaoStatus;
+import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.*;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.model.Transacao;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.repository.TransacaoRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +32,7 @@ public class TransacaoService {
     @Autowired
     private JwtService jwtService;
 
-    public TransacaoClientResponse salvarTransacao(TransacaoRequest transacaoRequest) {
+    public TransacaoResponse salvarTransacao(TransacaoRequest transacaoRequest) {
         try {
             log.info("Realizando chamada ao endpoint de salvar e capturar transações com dados: ".concat(transacaoRequest.toJson()));
             validarDadosTransacao(transacaoRequest);
@@ -45,10 +41,10 @@ public class TransacaoService {
             var transacaoClientRequest =  TransacaoClientRequest.converterDe(usuario, transacaoRequest);
             var transacaoRealizada = realizarTransacaoPagarme(transacaoClientRequest);
             validarTransacaoAprovada(transacaoRealizada);
-            persistirTransacao(transacaoRealizada, usuario, cartao);
-            capturarTransacaoPagarme(transacaoRealizada);
+            var transacao = persistirTransacao(transacaoRealizada, usuario, cartao);
+            capturarTransacaoPagarme(transacao);
             log.info("Resposta da chamada de realização de transações: ".concat(transacaoRealizada.toJson()));
-            return transacaoRealizada;
+            return TransacaoResponse.converterDe(transacao);
         } catch (Exception ex) {
             log.error("Erro ao salvar transação: ", ex);
             throw new ValidacaoException("Erro ao salvar transação: " + ex.getMessage());
@@ -71,24 +67,28 @@ public class TransacaoService {
         }
     }
 
-    private TransacaoClientResponse capturarTransacaoPagarme(TransacaoClientResponse transacaoRealizada) {
-        if (transacaoRealizada.getStatus().equals(AUTORIZADA.getStatusPagarme())) {
-            log.info("A transação".concat(transacaoRealizada.getIdStr()).concat(" está AUTORIZADA. Poderá ser feita a captura."));
-            var transacaoCapturada = integracaoTransacaoService.capturarTransacao(transacaoRealizada.getId());
+    private Transacao capturarTransacaoPagarme(Transacao transacao) {
+        if (transacao.isAutorizada()) {
+            log.info("A transação".concat(String.valueOf(transacao.getTransacaoId())).concat(" está AUTORIZADA. Poderá ser feita a captura."));
+            var transacaoCapturada = integracaoTransacaoService.capturarTransacao(transacao.getTransacaoId());
             atualizarStatusTransacao(transacaoCapturada);
-            return transacaoCapturada;
+            return transacao;
         }
-        logarResultadoCaptura(transacaoRealizada);
-        return transacaoRealizada;
+        logarResultadoCaptura(transacao);
+        return transacao;
     }
 
-    private void logarResultadoCaptura(TransacaoClientResponse transacaoRealizada) {
+    private void logarResultadoCaptura(Transacao transacao) {
 
-        if (ANALISANDO.getStatusPagarme().equals(transacaoRealizada.getStatus())) {
-            log.info("A transação ".concat(transacaoRealizada.getIdStr()).concat(" não pode ser capturada pois está em análise."));
+        if (transacao.isAnalise()) {
+            log.info("A transação "
+                .concat(String.valueOf(transacao.getTransacaoId()))
+                .concat(" não pode ser capturada pois está em análise."));
         }
-        if (PAGA.getStatusPagarme().equals(transacaoRealizada.getStatus())) {
-            log.info("A transação ".concat(transacaoRealizada.getIdStr()).concat(" já está paga e capturada."));
+        if (transacao.isPaga()) {
+            log.info("A transação "
+                .concat(String.valueOf(transacao.getTransacaoId()))
+                .concat(" já está paga e capturada."));
         }
     }
 
@@ -106,12 +106,13 @@ public class TransacaoService {
     }
 
     @Transactional
-    private void persistirTransacao(TransacaoClientResponse transacaoResponse,
+    private Transacao persistirTransacao(TransacaoClientResponse transacaoResponse,
                                     JwtUsuarioResponse usuario,
                                     Cartao cartao) {
         log.info("Salvando a transação: ".concat(transacaoResponse.getIdStr()));
         transacaoRepository.save(Transacao.converterDe(usuario, transacaoResponse, cartao));
         log.info("Transação: ".concat(transacaoResponse.getIdStr()).concat(" salva com sucesso."));
+        return buscarPorTransacaoId(transacaoResponse.getId());
     }
 
     private void validarDadosTransacao(TransacaoRequest request) {

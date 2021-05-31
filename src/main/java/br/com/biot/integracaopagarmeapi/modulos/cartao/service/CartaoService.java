@@ -41,7 +41,7 @@ public class CartaoService {
         var cartaoCriadoPagarme = integracaoCartaoService
             .salvarCartao(CartaoClientRequest.converterDe(request));
         var usuarioAutenticado = jwtService.recuperarUsuarioAutenticado();
-        validarCartaoIdJaExistente(cartaoCriadoPagarme.getId());
+        validarCartaoIdJaExistente(cartaoCriadoPagarme.getId(), usuarioAutenticado.getId());
         var cartaoSalvo = salvarCartaoDoPagarme(cartaoCriadoPagarme, usuarioAutenticado);
         var response = CartaoResponse.converterDe(cartaoSalvo);
         log.info("Resposta do endpoint de salvar cartão: ".concat(response.toJson()));
@@ -68,8 +68,8 @@ public class CartaoService {
         }
     }
 
-    private void validarCartaoIdJaExistente(String cartaoId) {
-        if (cartaoRepository.existsByCartaoId(cartaoId)) {
+    private void validarCartaoIdJaExistente(String cartaoId, String usuarioId) {
+        if (cartaoRepository.existsByCartaoIdAndUsuarioId(cartaoId, usuarioId)) {
             throw new ValidacaoException("Este cartão já existe.");
         }
     }

@@ -14,5 +14,5 @@ public interface CartaoRepository extends JpaRepository<Cartao, Integer> {
 
     Optional<Cartao> findByCartaoIdAndUsuarioId(String cartaoId, String usuarioId);
 
-    Boolean existsByCartaoId(String cartaoId);
+    Boolean existsByCartaoIdAndUsuarioId(String cartaoId, String usuarioId);
 }
