@@ -3,6 +3,7 @@ package br.com.biot.integracaopagarmeapi.modulos.transacao.model;
 import br.com.biot.integracaopagarmeapi.modulos.cartao.model.Cartao;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.transacao.TransacaoClientResponse;
 import br.com.biot.integracaopagarmeapi.modulos.jwt.dto.JwtUsuarioResponse;
+import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.TransacaoRequest;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.enums.TransacaoStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,6 +46,15 @@ public class Transacao {
     @Column(name = "USUARIO_ID", nullable = false)
     private String usuarioId;
 
+    @Column(name = "EMPRESA_ID")
+    private Integer empresaId;
+
+    @Column(name = "EMPRESA_NOME")
+    private String empresaNome;
+
+    @Column(name = "EMPRESA_CPF_CNPJ")
+    private String empresaCpfCnpj;
+
     @Transient
     public boolean isPaga() {
         return TransacaoStatus.PAGA.equals(transacaoStatus)
@@ -76,6 +86,7 @@ public class Transacao {
     }
 
     public static Transacao converterDe(JwtUsuarioResponse usuario,
+                                        TransacaoRequest transacaoRequest,
                                         TransacaoClientResponse transacaoResponse,
                                         Cartao cartao) {
         return Transacao
@@ -85,6 +96,9 @@ public class Transacao {
             .situacaoTransacao(transacaoResponse.getStatus())
             .usuarioId(usuario.getId())
             .cartao(cartao)
+            .empresaId(transacaoRequest.getCobranca().getId())
+            .empresaNome(transacaoRequest.getCobranca().getNome())
+            .empresaCpfCnpj(transacaoRequest.getCobranca().getCpfCnpj())
             .build();
     }
 

@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.beans.Transient;
 import java.math.BigDecimal;
 
 @Data

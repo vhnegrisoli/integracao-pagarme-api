@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CobrancaRequest {
 
+    private Integer id;
     private String nome;
+    private String cpfCnpj;
     private EnderecoCobrancaRequest endereco;
 }

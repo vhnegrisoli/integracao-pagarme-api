@@ -42,7 +42,7 @@ public class TransacaoService {
             var transacaoClientRequest =  TransacaoClientRequest.converterDe(usuario, transacaoRequest);
             var transacaoRealizada = realizarTransacaoPagarme(transacaoClientRequest);
             validarTransacaoAprovada(transacaoRealizada);
-            var transacao = persistirTransacao(transacaoRealizada, usuario, cartao);
+            var transacao = persistirTransacao(transacaoRequest, transacaoRealizada, usuario, cartao);
             capturarTransacaoPagarme(transacao);
             log.info("Resposta da chamada de realização de transações: ".concat(transacaoRealizada.toJson()));
             return TransacaoResponse.converterDe(transacao);
@@ -107,11 +107,12 @@ public class TransacaoService {
     }
 
     @Transactional
-    private Transacao persistirTransacao(TransacaoClientResponse transacaoResponse,
-                                    JwtUsuarioResponse usuario,
-                                    Cartao cartao) {
+    private Transacao persistirTransacao(TransacaoRequest transacaoRequest,
+                                         TransacaoClientResponse transacaoResponse,
+                                         JwtUsuarioResponse usuario,
+                                         Cartao cartao) {
         log.info("Salvando a transação: ".concat(transacaoResponse.getIdStr()));
-        transacaoRepository.save(Transacao.converterDe(usuario, transacaoResponse, cartao));
+        transacaoRepository.save(Transacao.converterDe(usuario, transacaoRequest, transacaoResponse, cartao));
         log.info("Transação: ".concat(transacaoResponse.getIdStr()).concat(" salva com sucesso."));
         return buscarPorTransacaoId(transacaoResponse.getId());
     }
