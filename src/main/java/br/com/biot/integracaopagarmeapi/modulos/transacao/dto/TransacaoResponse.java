@@ -8,8 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import static br.com.biot.integracaopagarmeapi.modulos.util.NumeroUtil.tratarValorPagamento;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Data
@@ -28,6 +30,7 @@ public class TransacaoResponse {
     private String transacaoUsuarioId;
     private String transacaoCartaoUltimosDigitos;
     private String transacaoCartaoBandeira;
+    private BigDecimal valorPagamento;
 
     public static TransacaoResponse converterDe(Transacao transacao) {
         return TransacaoResponse
@@ -43,6 +46,7 @@ public class TransacaoResponse {
             .transacaoCartaoId(transacao.getCartao().getCartaoId())
             .transacaoCartaoUltimosDigitos(transacao.getCartao().getUltimosDigitos())
             .transacaoCartaoBandeira(transacao.getCartao().getBandeira())
+            .valorPagamento(tratarValorPagamento(transacao.getValorPagamento()))
             .build();
     }
 }

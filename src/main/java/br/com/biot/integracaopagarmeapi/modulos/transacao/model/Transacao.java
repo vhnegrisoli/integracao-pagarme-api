@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -54,6 +55,9 @@ public class Transacao {
 
     @Column(name = "EMPRESA_CPF_CNPJ")
     private String empresaCpfCnpj;
+
+    @Column(name = "VALOR_PAGAMENTO")
+    private BigDecimal valorPagamento;
 
     @Transient
     public boolean isPaga() {
@@ -99,6 +103,7 @@ public class Transacao {
             .empresaId(transacaoRequest.getCobranca().getId())
             .empresaNome(transacaoRequest.getCobranca().getNome())
             .empresaCpfCnpj(transacaoRequest.getCobranca().getCpfCnpj())
+            .valorPagamento(transacaoResponse.getTotalPago())
             .build();
     }
 

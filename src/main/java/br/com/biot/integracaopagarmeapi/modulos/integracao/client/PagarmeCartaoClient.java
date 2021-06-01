@@ -1,14 +1,9 @@
 package br.com.biot.integracaopagarmeapi.modulos.integracao.client;
 
-import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.ApiKeyRequest;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.cartao.CartaoClientRequest;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.cartao.CartaoClientResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.cloud.openfeign.SpringQueryMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -22,6 +17,6 @@ public interface PagarmeCartaoClient {
     Optional<CartaoClientResponse> salvarCartao(@RequestBody CartaoClientRequest request);
 
     @GetMapping("{cardId}")
-    Optional<CartaoClientResponse> buscarCartaoPorId(@PathVariable(name = "card_id") String cardId,
-                                                     @SpringQueryMap ApiKeyRequest request);
+    Optional<CartaoClientResponse> buscarCartaoPorId(@PathVariable String cardId,
+                                                     @RequestParam(name = "api_key") String apiKey);
 }

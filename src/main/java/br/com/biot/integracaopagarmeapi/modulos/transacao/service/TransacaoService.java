@@ -71,7 +71,8 @@ public class TransacaoService {
     private Transacao capturarTransacaoPagarme(Transacao transacao) {
         if (transacao.isAutorizada()) {
             log.info("A transação".concat(String.valueOf(transacao.getTransacaoId())).concat(" está AUTORIZADA. Poderá ser feita a captura."));
-            var transacaoCapturada = integracaoTransacaoService.capturarTransacao(transacao.getTransacaoId());
+            var transacaoCapturada = integracaoTransacaoService
+                .capturarTransacao(transacao.getTransacaoId(), transacao.getValorPagamento());
             atualizarStatusTransacao(transacaoCapturada);
             return transacao;
         }

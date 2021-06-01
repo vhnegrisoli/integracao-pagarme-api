@@ -2,7 +2,6 @@ package br.com.biot.integracaopagarmeapi.modulos.integracao.service;
 
 import br.com.biot.integracaopagarmeapi.config.exception.ValidacaoException;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.client.PagarmeCartaoClient;
-import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.ApiKeyRequest;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.cartao.CartaoClientRequest;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.cartao.CartaoClientResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +38,7 @@ public class IntegracaoCartaoService {
         try {
             log.info("Realizando chamada à API do Pagar.me para buscar um cartão pelo ID: ".concat(cartaoId));
             var response = cartaoClient
-                .buscarCartaoPorId(cartaoId, ApiKeyRequest.criar(apiKey))
+                .buscarCartaoPorId(cartaoId, apiKey)
                 .orElseThrow(() -> new ValidacaoException("Erro ao tentar buscar cartão por ID na Pagar.me."));
             log.info("Obtendo resposta da API do Pagar.me de cartão por ID: ".concat(response.toJson()));
             return response;

@@ -1,14 +1,10 @@
 package br.com.biot.integracaopagarmeapi.modulos.integracao.client;
 
-import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.ApiKeyRequest;
+import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.transacao.TransacaoCapturaRequest;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.transacao.TransacaoClientRequest;
 import br.com.biot.integracaopagarmeapi.modulos.integracao.dto.transacao.TransacaoClientResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.cloud.openfeign.SpringQueryMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -23,9 +19,9 @@ public interface PagarmeTransacaoClient {
 
     @PostMapping("{transaction_id}/capture")
     Optional<TransacaoClientResponse> capturarTransacao(@PathVariable(name = "transaction_id") Long transactionId,
-                                                 @SpringQueryMap ApiKeyRequest apiKeyRequest);
+                                                        @RequestBody TransacaoCapturaRequest apiKeyRequest);
 
     @GetMapping("{transaction_id}")
     Optional<TransacaoClientResponse> buscarTransacaoPorId(@PathVariable(name = "transaction_id") Long transactionId,
-                                                    @SpringQueryMap ApiKeyRequest apiKeyRequest);
+                                                           @RequestParam(name = "api_key") String apiKey);
 }
