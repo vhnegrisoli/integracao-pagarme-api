@@ -11,6 +11,7 @@ import org.apache.logging.log4j.util.Strings;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import static br.com.biot.integracaopagarmeapi.modulos.util.Constantes.DATA_HORA_BR_FORMATO;
 import static br.com.biot.integracaopagarmeapi.modulos.util.NumeroUtil.tratarValorPagamento;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
@@ -24,7 +25,7 @@ public class TransacaoResponse {
     private Long transacaoPagarmeId;
     private String transacaoPagarmeStatus;
     private String transacaoStatus;
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+    @JsonFormat(pattern = DATA_HORA_BR_FORMATO)
     private LocalDateTime horarioTransacao;
     private String transacaoCartaoId;
     private String transacaoUsuarioId;

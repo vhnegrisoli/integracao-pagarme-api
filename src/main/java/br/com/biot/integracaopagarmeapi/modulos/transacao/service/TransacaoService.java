@@ -10,6 +10,7 @@ import br.com.biot.integracaopagarmeapi.modulos.integracao.service.IntegracaoTra
 import br.com.biot.integracaopagarmeapi.modulos.jwt.dto.JwtUsuarioResponse;
 import br.com.biot.integracaopagarmeapi.modulos.jwt.service.JwtService;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.dto.*;
+import br.com.biot.integracaopagarmeapi.modulos.transacao.enums.TransacaoStatus;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.model.Transacao;
 import br.com.biot.integracaopagarmeapi.modulos.transacao.repository.TransacaoRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +71,7 @@ public class TransacaoService {
 
     private Transacao capturarTransacaoPagarme(Transacao transacao) {
         if (transacao.isAutorizada()) {
-            log.info("A transação".concat(String.valueOf(transacao.getTransacaoId())).concat(" está AUTORIZADA. Poderá ser feita a captura."));
+            log.info(String.format("A transação %s está AUTORIZADA. Poderá ser feita a captura.", transacao.getTransacaoId()));
             var transacaoCapturada = integracaoTransacaoService
                 .capturarTransacao(transacao.getTransacaoId(), transacao.getValorPagamento());
             atualizarStatusTransacao(transacaoCapturada);
@@ -95,16 +96,16 @@ public class TransacaoService {
     }
 
     @Transactional
-    private void atualizarStatusTransacao(TransacaoClientResponse transacaoCapturada) {
+    private void atualizarStatusTransacao(TransacaoClientResponse transacaoPagarme) {
         log.info("Atualizando o status da transação "
-            .concat(transacaoCapturada.getIdStr())
+            .concat(transacaoPagarme.getIdStr())
             .concat(" para situação: ")
-            .concat(transacaoCapturada.getStatus()));
-        var transacaoExistente = buscarPorTransacaoId(transacaoCapturada.getId());
-        transacaoExistente.setSituacaoTransacao(transacaoCapturada.getStatus());
-        transacaoExistente.setTransacaoStatus(Transacao.definirTransacaoStatus(transacaoCapturada.getStatus()));
+            .concat(transacaoPagarme.getStatus()));
+        var transacaoExistente = buscarPorTransacaoId(transacaoPagarme.getId());
+        transacaoExistente.setSituacaoTransacao(transacaoPagarme.getStatus());
+        transacaoExistente.setTransacaoStatus(Transacao.definirTransacaoStatus(transacaoPagarme.getStatus()));
         transacaoRepository.save(transacaoExistente);
-        log.info("Status da transação ".concat(transacaoCapturada.getIdStr()).concat(" atualizada com sucesso."));
+        log.info("Status da transação ".concat(transacaoPagarme.getIdStr()).concat(" atualizada com sucesso."));
     }
 
     @Transactional
@@ -181,5 +182,47 @@ public class TransacaoService {
             throw new OperacaoProibidaException("Você não tem permissão para visualizar os dados dessa transação.");
         }
         return TransacaoResponse.converterDe(transacao);
+    }
+
+    public void capturarTransacoesAutorizadas() {
+        var transacoesCaptura = transacaoRepository
+            .findByTransacaoStatusInOrSituacaoTransacaoIn(
+                TransacaoStatus.informarStatusValidosCaptura(),
+                TransacaoStatus.informarSituacoesValidosCaptura()
+            );
+        if (isEmpty(transacoesCaptura)) {
+            log.info("Não foram encontradas transações para análise de atualização de status ou captura.");
+        } else {
+            log.info(String.format("Foram encontradas %s transações para análise.", transacoesCaptura.size()));
+            transacoesCaptura.forEach(this::capturarOuAtualizarStatusTransacao);
+        }
+    }
+
+    private void capturarOuAtualizarStatusTransacao(Transacao transacao) {
+        try {
+            log.info(String.format("Analisando transação %s.", transacao.getTransacaoId()));
+            validarCapturaTransacao(transacao);
+            validarAtualizacaoSituacao(transacao);
+        } catch (Exception ex) {
+            log.error(String.format(
+                "Erro ao tentar atualizar ou capturar o status da transação %s. Erro: ", transacao.getTransacaoId()),
+                ex);
+        }
+    }
+
+    private void validarCapturaTransacao(Transacao transacao) {
+        if (transacao.isAutorizada()) {
+            capturarTransacaoPagarme(transacao);
+        }
+    }
+
+    private void validarAtualizacaoSituacao(Transacao transacao) {
+        if (!transacao.isPaga()) {
+            log.info(String.format(
+                "A transação %s não está paga e nem autorizada. Buscando dados na Pagar.me para atualizar situação.",
+                transacao.getTransacaoId()));
+            var transacaoPagarme = integracaoTransacaoService.buscarTransacaoPorId(transacao.getTransacaoId());
+            atualizarStatusTransacao(transacaoPagarme);
+        }
     }
 }

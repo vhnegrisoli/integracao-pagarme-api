@@ -33,6 +33,10 @@ app-config:
   description: API de integração com o serviço de pagamentos da Pagar.me
   url: http://localhost:8098/
 
+  schedulers:
+    transacoes:
+      atualizar-transacoes-cada-20-minutos: "0 0/20 * * * *"
+
 pagarme:
   api_keys:
     teste: teste

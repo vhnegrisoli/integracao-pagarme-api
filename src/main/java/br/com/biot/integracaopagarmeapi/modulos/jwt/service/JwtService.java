@@ -40,7 +40,7 @@ public class JwtService {
         try {
             return JwtUsuarioResponse.of(descriptografarJwt(jwt).getBody());
         } catch (Exception ex) {
-            log.info("Erro ao processar token de acesso: ".concat(jwt).concat(". Erro: "), ex);
+            log.error("Erro ao processar token de acesso: ".concat(jwt).concat(". Erro: "), ex);
             throw TOKEN_ACESSO_INVALIDO;
         }
     }
@@ -53,7 +53,7 @@ public class JwtService {
                 .build()
                 .parseClaimsJws(jwt);
         } catch (Exception ex) {
-            log.info("Erro ao processar token de acesso: ".concat(jwt).concat(". Erro: "), ex);
+            log.error("Erro ao processar token de acesso: ".concat(jwt).concat(". Erro: "), ex);
             throw TOKEN_ACESSO_INVALIDO;
         }
     }
