@@ -7,4 +7,5 @@ public interface Constantes {
     String TIPO_CPF = "cpf";
     String COMPLEMENTO_EMPRESA = "Empresa";
     String DATA_HORA_BR_FORMATO = "dd/MM/yyyy HH:mm:ss";
+    String REGEX_APENAS_NUMEROS = "\\d+";
 }

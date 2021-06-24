@@ -6,10 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 
-import static br.com.biot.integracaopagarmeapi.modulos.util.Constantes.COMPLEMENTO_EMPRESA;
-import static br.com.biot.integracaopagarmeapi.modulos.util.Constantes.PAIS_BRASIL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static br.com.biot.integracaopagarmeapi.modulos.util.Constantes.*;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Data
@@ -49,6 +52,19 @@ public class EnderecoCobrancaClientRequest {
         if (isEmpty(enderecoCobrancaClientRequest.getComplemento())) {
             enderecoCobrancaClientRequest.setComplemento(COMPLEMENTO_EMPRESA);
         }
+        enderecoCobrancaClientRequest.setCep(tratarCep(enderecoCobrancaRequest.getCep()));
         return enderecoCobrancaClientRequest;
+    }
+
+    public static String tratarCep(String cep) {
+        if (!isEmpty(cep)) {
+            var padrao = Pattern.compile(REGEX_APENAS_NUMEROS).matcher(cep);
+            var novoCep = Strings.EMPTY;
+            while (padrao.find()) {
+                novoCep = novoCep.concat(padrao.group());
+            }
+            return novoCep;
+        }
+        return Strings.EMPTY;
     }
 }
